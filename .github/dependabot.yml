@@ -1,5 +1,7 @@
+---
 version: 2
 updates:
+  # if you've got poetry / a requirements.txt, uncomment this
   # - package-ecosystem: pip
   #   directory: /
   #   schedule:
@@ -11,6 +13,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
-      day: saturday
+      day: monday
       time: "02:00"
       timezone: "Australia/Brisbane"
