@@ -27,7 +27,7 @@
     </input>
     <input type="text" token="headToken">
       <label>Second Scan Mod (for demos)</label>
-      <initialValue>| eval body_md5=if(random()%3=0,"qwerty",body_md5) | head 20</initialValue>
+      <initialValue>| eval body_md5=if(random()%5=0,"qwerty",body_md5) | head 100</initialValue>
     </input>
     <input type="radio" token="changedFilter">
       <label>View</label>

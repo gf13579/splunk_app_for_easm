@@ -3,11 +3,17 @@
   <description></description>
   <fieldset submitButton="false">
     <input type="time" token="timePicker1">
-      <label></label>
+      <label>Time</label>
       <default>
         <earliest>-24h@h</earliest>
         <latest>now</latest>
       </default>
+    </input>
+    <input type="text" token="hostnameToken">
+      <label>Queried Hostname Filter</label>
+      <default>*</default>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
     </input>
     <input type="multiselect" token="portToken">
       <label>Port Filter</label>
@@ -35,7 +41,7 @@
     <panel>
       <table>
         <search>
-          <query>index="easm" sourcetype="easm:open_port" port IN $portToken$
+          <query>index="easm" sourcetype="easm:open_port" port IN $portToken$ easm.hostname="$hostnameToken$"
 | dedup easm.entity, ip, port, easm.port_scan_type
     ``` 
 | stats max(_time) as last_seen, min(_time) as first_seen, latest(hostname) as hostname, latest(easm.hostname) as easm_hostname by easm.entity, ip, port, easm.port_scan_type 

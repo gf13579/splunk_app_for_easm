@@ -12,17 +12,24 @@
       <label>Exclude URLs Matching</label>
       <initialValue>*autodiscover.*</initialValue>
     </input>
+    <input type="text" token="urlFilter">
+      <label>URL Filter</label>
+      <default>*</default>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+    </input>
   </fieldset>
   <row>
     <panel>
       <table>
         <title>Click to drilldown for more detailed results</title>
         <search>
-          <query>index="easm" sourcetype="easm:http_service" NOT url = "$excludeUrlFilter$" | rex field=url mode=sed "s/:(443|80)//g"
+          <query>index="easm" sourcetype="easm:http_service" url = "$urlFilter$" NOT url = "$excludeUrlFilter$" 
+| rex field=url mode=sed "s/:(443|80)//g" 
 | dedup easm.entity, url 
 | rename easm.entity as entity, a{} as a_records, time as load_time_ms, location as redirect_location 
 | sort - _time 
-| eval load_time_ms=round(load_time_ms,2), screenshot = if(isnotnull(screenshot_bytes),`emoji("\"screen\"")`,"")
+| eval load_time_ms=round(load_time_ms,2), screenshot = if(isnotnull(screenshot_bytes),`emoji("\"screen\"")`,"") 
 | table _time, entity, url, screenshot, load_time_ms, webserver, status_code, hostname, lines, redirect_location, method, port, scheme, words</query>
           <earliest>$timePicker1.earliest$</earliest>
           <latest>$timePicker1.latest$</latest>
@@ -36,6 +43,7 @@
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">cell</option>
         <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
         <option name="rowNumbers">false</option>
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>

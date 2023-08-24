@@ -1,4 +1,8 @@
-lookups/*
+passwords.conf
+local/app.conf
+local/inputs.conf
+
+lookups/*.csv
 lookups/
 .vscode/
 local.meta

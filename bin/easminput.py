@@ -3,6 +3,7 @@ import os
 import sys
 from loguru import logger
 import requests
+
 # import splunklib.results as results
 import easm_consts
 from requests.adapters import HTTPAdapter, Retry
@@ -113,7 +114,9 @@ class MyScript(Script):
         # Get mod input params
         discovery_type = str(inputs.inputs[stanza]["discovery_type"])
         entity = str(inputs.inputs[stanza]["entity"])
-        take_screenshots = bool(int(inputs.inputs[stanza].get("take_screenshots", False)))
+        take_screenshots = bool(
+            int(inputs.inputs[stanza].get("take_screenshots", False))
+        )
 
         settings = easm_helper.get_password(self.service, "app_for_easm_realm")
         if settings is None:
@@ -148,13 +151,19 @@ class MyScript(Script):
             if item["out_of_scope"] != "true" and item["entity"] in (entity, "*")
         ]
         discovered_subdomains = [
-            item for item in easm_helper.read_lookup_file("discovered_subdomains.csv")
+            item
+            for item in easm_helper.read_lookup_file("discovered_subdomains.csv")
+            if item["entity"] in (entity, "*")
         ]
         discovered_open_ports = [
-            item for item in easm_helper.read_lookup_file("discovered_open_ports.csv")
+            item
+            for item in easm_helper.read_lookup_file("discovered_open_ports.csv")
+            if item["entity"] in (entity, "*")
         ]
         discovered_web_services = [
-            item for item in easm_helper.read_lookup_file("discovered_web_services.csv")
+            item
+            for item in easm_helper.read_lookup_file("discovered_web_services.csv")
+            if item["entity"] in (entity, "*")
         ]
 
         headers = {
@@ -171,7 +180,7 @@ class MyScript(Script):
             "callback_url": hec_url,  # '   ',
             "callback_auth": "Splunk " + hec_token,
             "callback_verify": False,
-            "take_screenshots": take_screenshots
+            "take_screenshots": take_screenshots,
         }
 
         if worker_url.endswith("/"):
@@ -210,11 +219,17 @@ class MyScript(Script):
                     [target["target"] for target in apex_domains]
                     + [target["target"] for target in ip_ranges]
                     + [target["target"] for target in known_subdomains]
-                    + [target["hostname"] for target in discovered_subdomains
-                        if target["ip"] != "127.0.0.1"]
+                    + [
+                        target["hostname"]
+                        for target in discovered_subdomains
+                        if target["ip"] != "127.0.0.1"
+                    ]
                     + flatten_list(
-                        [target["ip"].split(",") for target in discovered_subdomains
-                         if target["ip"] != "127.0.0.1"]
+                        [
+                            target["ip"].split(",")
+                            for target in discovered_subdomains
+                            if target["ip"] != "127.0.0.1"
+                        ]
                     )
                 )
 

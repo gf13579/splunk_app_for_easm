@@ -57,22 +57,25 @@
     <panel>
       <table>
         <search>
-          <query>`easm_index` sourcetype="easm:web_vuln_scan" info.name IN $scanIdsToken$ NOT info.name IN $scanIdsToExcludeToken$ easm.target = "$targetToken$"
+          <query>`easm_index` sourcetype="easm:web_vuln_scan" info.name IN $scanIdsToken$ NOT info.name IN $scanIdsToExcludeToken$ easm.target = "$targetToken$" 
 | sort -_time 
 | rename *{} as * 
-| table _time, easm.entity, info.severity, hostname, info.name, matcher-name, extracted-results, matched-at,ip</query>
+| table _time, easm.entity, info.severity, hostname, info.name, matcher-name, extracted-results, matched-at,ip | rename info.severity as severity</query>
           <earliest>$timePicker1.earliest$</earliest>
           <latest>$timePicker1.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>
         <option name="dataOverlayMode">none</option>
-        <option name="drilldown">cell</option>
+        <option name="drilldown">none</option>
         <option name="percentagesRow">false</option>
         <option name="refresh.display">progressbar</option>
         <option name="rowNumbers">false</option>
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>
+        <format type="color" field="severity">
+          <colorPalette type="map">{"info":#004080,"low":#88527D,"medium":#806000,"high":#802000,"critical":#9E2520}</colorPalette>
+        </format>
       </table>
     </panel>
   </row>

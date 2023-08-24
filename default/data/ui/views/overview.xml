@@ -243,7 +243,7 @@
         </search>
         <option name="count">5</option>
         <option name="dataOverlayMode">none</option>
-        <option name="drilldown">none</option>
+        <option name="drilldown">cell</option>
         <option name="percentagesRow">false</option>
         <option name="rowNumbers">false</option>
         <option name="totalsRow">false</option>
@@ -253,18 +253,18 @@
   </row>
   <row>
     <panel>
-      <title>IPs With the Most Open Ports</title>
+      <title>Least Common Web Servers</title>
       <table>
         <search>
-          <query>`get_all_discovered_open_ports` 
-| stats dc(port) as dc_port, values(port) as ports, values(easm_hostname) as easm_hostnames, values(hostname) as hostnames by ip, entity
-| sort - dc_port 
-| eval ports=mvjoin(ports, ", ")</query>
+          <query>`get_all_discovered_web_services` 
+| fillnull value="Unknown" webserver 
+| stats count by webserver 
+| sort count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
         </search>
-        <option name="count">5</option>
+        <option name="count">10</option>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">none</option>
         <option name="percentagesRow">false</option>
@@ -299,6 +299,30 @@
   </row>
   <row>
     <panel>
+      <title>IPs With the Most Open Ports</title>
+      <table>
+        <search>
+          <query>`get_all_discovered_open_ports` 
+| stats dc(port) as dc_port, values(port) as ports, values(easm_hostname) as easm_hostnames, values(hostname) as hostnames by ip, entity
+| sort - dc_port 
+| eval ports=mvjoin(ports, ", ")</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">5</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
       <title>Certs Expiring Soon</title>
       <table>
         <search>
@@ -310,28 +334,6 @@
 | sort days_remaining
 | table easm.entity, days_remaining subject_cn, subject_an, days_remaining, hostname 
 | rename easm.entity as Entity, *{} as *, subject_cn AS "Common Name", subject_an AS "Alternate Names", days_remaining AS "Days Remaining", hostname AS "Discovery Target"</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
-        </search>
-        <option name="count">10</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="percentagesRow">false</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="rowNumbers">false</option>
-        <option name="totalsRow">false</option>
-        <option name="wrap">true</option>
-      </table>
-    </panel>
-    <panel>
-      <title>Least Common Web Servers</title>
-      <table>
-        <search>
-          <query>`get_all_discovered_web_services` 
-| fillnull value="Unknown" webserver 
-| stats count by webserver 
-| sort count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
