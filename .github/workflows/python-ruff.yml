@@ -21,4 +21,4 @@ jobs:
       - name: Running tests
         run: |
             python -m pip install --quiet --no-cache-dir --upgrade ruff
-            poetry run ruff bin/*.py
+            ruff bin/*.py
