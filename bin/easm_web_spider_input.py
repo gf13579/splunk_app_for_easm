@@ -3,6 +3,7 @@ import os
 import sys
 from loguru import logger
 import requests
+
 # import splunklib.results as results
 from requests.adapters import HTTPAdapter, Retry
 import easm_helper
@@ -15,11 +16,12 @@ from splunklib.modularinput import Scheme, Argument, Event, Script
 # sys.path.append(
 #     os.path.join(os.environ["SPLUNK_HOME"], "etc", "apps", "SA-VSCode", "bin")
 # )
-# import splunk_debug as dbg  # noqa: E402 "# type: ignore
-
-# dbg.enable_debugging(timeout=10)
-
-# dbg.set_breakpoint()
+# try:
+#     import splunk_debug as dbg  # noqa: E402 "# type: ignore
+#     dbg.enable_debugging(timeout=10)
+#     dbg.set_breakpoint()
+# except ImportError as error:
+#     print("Failed to import splunk_debug", file=sys.stderr)
 
 
 log_file = os.environ["SPLUNK_HOME"] + "/var/log/splunk/app_for_easm.log"
