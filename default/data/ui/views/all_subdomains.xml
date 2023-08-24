@@ -1,0 +1,54 @@
+<form version="1.1" theme="dark">
+  <label>Subdomains (tracked)</label>
+  <description>Recent search results combined with historic data from the discovered_subdomains lookup</description>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="entityToken">
+      <label>Entity</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <fieldForLabel>entity</fieldForLabel>
+      <fieldForValue>entity</fieldForValue>
+      <search>
+        <query>| inputlookup discovered_subdomains.csv | stats count by entity</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="dropdown" token="apexDomainToken">
+      <label>Apex Domain</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <fieldForLabel>apex_domain</fieldForLabel>
+      <fieldForValue>apex_domain</fieldForValue>
+      <search>
+        <query>`get_all_discovered_subdomains` | stats count by apex_domain</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>`get_all_discovered_subdomains` 
+| search entity="$entityToken$" apex_domain="$apexDomainToken$" 
+| sort - last_seen 
+| convert ctime(*seen) 
+| table entity, hostname, ip, apex_domain, last_seen, first_seen, discovery_source</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

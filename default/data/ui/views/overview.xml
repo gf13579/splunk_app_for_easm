@@ -1,0 +1,368 @@
+<dashboard version="1.1" theme="dark">
+  <!--
+  <search id="baseSearchCountBySourcetype">
+    <query>
+      `easm_index` sourcetype = easm:* | stats count by sourcetype
+    </query>
+    <earliest>-24h@h</earliest>
+    <latest>now</latest>
+  </search>
+-->
+  <label>Overview</label>
+  <row>
+    <panel>
+      <single>
+        <title>Discovered Subdomains</title>
+        <search>
+          <query>`get_all_discovered_subdomains` 
+| eval _time = if(first_seen&gt;relative_time(now(),"-1w"),now(),relative_time(now(),"-1d")) 
+| timechart dc(hostname)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x00364D","0x00364D"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Discovered Open Ports</title>
+        <search>
+          <query>`get_all_discovered_open_ports` 
+| eval _time = if(first_seen&gt;relative_time(now(),"-1w"),now(),relative_time(now(),"-1d")) 
+| timechart count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x00415D","0x00415D"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Discovered Web Services</title>
+        <search>
+          <query>`get_all_discovered_web_services` 
+| eval _time = if(first_seen&gt;relative_time(now(),"-1w"),now(),relative_time(now(),"-1d")) 
+| timechart count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x004C6C","0x004C6C"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Identified Vulnerabilities</title>
+        <search>
+          <query>`easm_index` sourcetype="easm:web_vuln_scan" NOT "info.severity"=info 
+| timechart span=24h count 
+| appendpipe 
+    [ stats count 
+    | where count=0]</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x00577C","0x00577C"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Certs Expiring Soon</title>
+        <search>
+          <query>`easm_index` sourcetype="easm:tls_cert" 
+| dedup easm.entity, hostname 
+| eval not_after_epoch = strptime(not_after,"%Y-%m-%dT%H:%M:%SZ") 
+| where (not_after_epoch-now()) &lt; 2592000 AND not_after_epoch &gt;= now() | stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x006D9C","0x006D9C"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Recent Results by Entity and Type</title>
+      <chart>
+        <search>
+          <query>`easm_index` sourcetype=easm:* 
+| rex mode=sed field=sourcetype "s/easm:*//g" 
+| chart count over easm.entity by sourcetype 
+| rename easm.entity as entity</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="height">140.98</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Newly Discovered Subdomains (today, or since last discovery)</title>
+      <table>
+        <search>
+          <query>`get_all_discovered_subdomains` 
+| where NOT ip="127.0.0.1" 
+| where (first_seen=last_seen) OR last_seen&gt;relative_time(now(), "@d") 
+| sort - last_seen 
+| table entity, hostname, ip, discovery_source</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">5</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <link target="_blank">/app/app_for_easm/subdomain_detail?form.tokSub=$row.hostname$</link>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <title>Newly Discovered Open Ports (exc. autodiscover.*)</title>
+      <table>
+        <search>
+          <query>`get_all_discovered_open_ports` 
+| where first_seen=last_seen | search NOT easm_hostname = "autodiscover.*"
+| sort - last_seen
+| table entity, ip, port, hostname, easm_hostname
+| rename hostname as "hostname (from discovery)", easm_hostname as "hostname (queried)"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">5</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>IPs With the Most Open Ports</title>
+      <table>
+        <search>
+          <query>`get_all_discovered_open_ports` 
+| stats dc(port) as dc_port, values(port) as ports, values(easm_hostname) as easm_hostnames, values(hostname) as hostnames by ip, entity
+| sort - dc_port 
+| eval ports=mvjoin(ports, ", ")</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">5</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Least Common Open Ports</title>
+      <table>
+        <search>
+          <query>`get_all_discovered_open_ports` 
+| stats dc(ip) as count by port 
+| sort count 
+| lookup port_to_service_lookup port</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Certs Expiring Soon</title>
+      <table>
+        <search>
+          <query>`easm_index` sourcetype="easm:tls_cert" 
+| dedup easm.entity, hostname 
+| eval not_after_epoch = strptime(not_after,"%Y-%m-%dT%H:%M:%SZ") 
+| where (not_after_epoch-now()) &lt; 2592000 AND not_after_epoch &gt;= now() 
+| eval days_remaining = round((not_after_epoch-now())/86400,0) 
+| sort days_remaining
+| table easm.entity, days_remaining subject_cn, subject_an, days_remaining, hostname 
+| rename easm.entity as Entity, *{} as *, subject_cn AS "Common Name", subject_an AS "Alternate Names", days_remaining AS "Days Remaining", hostname AS "Discovery Target"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Least Common Web Servers</title>
+      <table>
+        <search>
+          <query>`get_all_discovered_web_services` 
+| fillnull value="Unknown" webserver 
+| stats count by webserver 
+| sort count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Subdomains by Apex Domain</title>
+      <table>
+        <search>
+          <query>`get_all_discovered_subdomains` | stats dc(hostname) as count by apex_domain, entity | sort - count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>

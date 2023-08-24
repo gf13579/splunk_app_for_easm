@@ -1,0 +1,50 @@
+<form version="1.1" theme="dark">
+  <label>Web Services</label>
+  <fieldset submitButton="false">
+    <input type="time" token="timePicker1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="excludeUrlFilter">
+      <label>Exclude URLs Matching</label>
+      <initialValue>*autodiscover.*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <title>Click to drilldown for more detailed results</title>
+        <search>
+          <query>index="easm" sourcetype="easm:http_service" NOT url = "$excludeUrlFilter$" | rex field=url mode=sed "s/:(443|80)//g"
+| dedup easm.entity, url 
+| rename easm.entity as entity, a{} as a_records, time as load_time_ms, location as redirect_location 
+| sort - _time 
+| eval load_time_ms=round(load_time_ms,2), screenshot = if(isnotnull(screenshot_bytes),`emoji("\"screen\"")`,"")
+| table _time, entity, url, screenshot, load_time_ms, webserver, status_code, hostname, lines, redirect_location, method, port, scheme, words</query>
+          <earliest>$timePicker1.earliest$</earliest>
+          <latest>$timePicker1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <!--<drilldown>
+          <set token="url">$row.url$</set>
+          <link target="_blank">$url|n$</link>
+        </drilldown>-->
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <!--<condition field="url">-->
+          <link target="_blank">/app/app_for_easm/web_service_scan_result?form.urlToken=$row.url$</link>
+          <!--</condition>-->
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>

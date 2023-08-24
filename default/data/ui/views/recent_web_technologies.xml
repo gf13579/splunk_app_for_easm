@@ -1,0 +1,74 @@
+<form version="1.1" theme="dark">
+  <label>Web Technologies</label>
+  <fieldset submitButton="false">
+    <input type="time" token="timePicker1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="scanIdsToken">
+      <label>Scan Templates Filter</label>
+      <choice value="*">All</choice>
+      <fieldForLabel>name</fieldForLabel>
+      <fieldForValue>name</fieldForValue>
+      <search>
+        <query>`easm_index` sourcetype="easm:web_tech_scan" | stats count by info.name | table info.name | rename info.name as name</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <valuePrefix>"</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter>,</delimiter>
+      <default>*</default>
+    </input>
+    <input type="multiselect" token="scanIdsToExcludeToken" searchWhenChanged="true">
+      <label>Scan Templates Exclusions</label>
+      <choice value="made_up_value">[None]</choice>
+      <fieldForLabel>name</fieldForLabel>
+      <fieldForValue>name</fieldForValue>
+      <search>
+        <query>`easm_index` sourcetype="easm:web_tech_scan" | stats count by info.name | table info.name | rename info.name as name</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <valuePrefix>"</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter>,</delimiter>
+      <default>TLS Version - Detect,HTTP Missing Security Headers</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>`easm_index` sourcetype="easm:web_tech_scan" info.name IN $scanIdsToken$ NOT info.name IN $scanIdsToExcludeToken$
+| rename matched-at AS matched_at, info.name AS info_name
+| eval matched_at = case(match(matched_at,"^http"),matched_at,match(matched_at,":443"),"https://".matched_at,match(info_name,"SSL"),"https://".matched_at, 1=1,matched_at) 
+| sort -_time 
+| rename *{} as * 
+| table _time, easm.entity, info.severity, hostname, info_name, matcher-name, extracted-results, matched_at, ip</query>
+          <earliest>$timePicker1.earliest$</earliest>
+          <latest>$timePicker1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <set token="url">$row.matched_at$</set>
+          <link target="_blank">$url|n$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>

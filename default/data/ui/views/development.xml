@@ -1,0 +1,38 @@
+<form version="1.1" theme="dark">
+  <label>Development</label>
+  <fieldset submitButton="false">
+    <input type="time" token="timepicker1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="sourcetypeToken">
+      <label>sourcetype</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <fieldForLabel>sourcetype</fieldForLabel>
+      <fieldForValue>sourcetype</fieldForValue>
+      <search>
+        <query>`easm_index` | stats count by sourcetype | table sourcetype</query>
+        <earliest>-5d@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>`easm_index`</title>
+      <event>
+        <search>
+          <query>`easm_index` sourcetype="$sourcetypeToken$" | sort -_time</query>
+          <earliest>$timepicker1.earliest$</earliest>
+          <latest>$timepicker1.latest$</latest>
+        </search>
+        <option name="list.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </event>
+    </panel>
+  </row>
+</form>

@@ -1,0 +1,68 @@
+<form version="1.1" theme="dark">
+  <label>Open Ports (tracked)</label>
+  <description>Recent search results combined with historic data from the discovered_open_ports lookup</description>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="entityToken">
+      <label>Entity</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <fieldForLabel>entity</fieldForLabel>
+      <fieldForValue>entity</fieldForValue>
+      <search>
+        <query>| inputlookup discovered_open_ports.csv | stats count by entity</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="portToken">
+      <label>Port Filter</label>
+      <choice value="*">All</choice>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>"</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter>,</delimiter>
+      <fieldForLabel>label</fieldForLabel>
+      <fieldForValue>port</fieldForValue>
+      <search>
+        <query>index="easm" sourcetype="easm:open_port" 
+| stats count by port 
+| sort - count 
+| lookup port_to_service_lookup port 
+| eval label=port." (".service.")"</query>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="text" token="hostnameFilterToken">
+      <label>Queried Hostname Filter</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>`get_all_discovered_open_ports` 
+| search port IN $portToken$ entity="$entityToken$" easm_hostname="$hostnameFilterToken$"
+| sort - last_seen 
+| convert ctime(*seen) | lookup port_to_service_lookup port
+| table entity, ip, port, service, hostname, easm_hostname, last_seen, first_seen, port_scan_type
+| rename hostname as "hostname (from discovery)", easm_hostname as "hostname (queried)", service as "service (likely)"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

@@ -1,0 +1,47 @@
+<form version="1.1" theme="dark">
+  <label>Search Tracked Items</label>
+  <fieldset submitButton="false">
+    <input type="text" token="ipToken">
+      <label>ip</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="hostnameToken">
+      <label>hostname</label>
+      <default>*</default>
+    </input>
+    <input type="text" token="portToken">
+      <label>port</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>| inputlookup discovered_subdomains.csv 
+| eval lookup_file="discovered_subdomains" 
+| append 
+    [| inputlookup discovered_open_ports.csv 
+    | eval lookup_file="discovered_open_ports"] 
+| append 
+    [| inputlookup discovered_web_services.csv 
+    | eval lookup_file="discovered_web_services"] 
+| table _time, hostname, first_seen, last_seen, ip, port, lookup_file 
+| convert ctime(*seen) 
+| search ip="$ipToken$" hostname="$hostnameToken$" port="$portToken$"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

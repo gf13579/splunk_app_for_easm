@@ -1,0 +1,66 @@
+<form version="1.1" theme="dark">
+  <label>Open Ports</label>
+  <description></description>
+  <fieldset submitButton="false">
+    <input type="time" token="timePicker1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="portToken">
+      <label>Port Filter</label>
+      <choice value="*">All</choice>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <initialValue>*</initialValue>
+      <valuePrefix>"</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter>,</delimiter>
+      <fieldForLabel>label</fieldForLabel>
+      <fieldForValue>port</fieldForValue>
+      <search>
+        <query>index="easm" sourcetype="easm:open_port" 
+| stats count by port 
+| sort - count 
+| lookup port_to_service_lookup port 
+| eval label=port." (".service.")"</query>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>index="easm" sourcetype="easm:open_port" port IN $portToken$
+| dedup easm.entity, ip, port, easm.port_scan_type
+    ``` 
+| stats max(_time) as last_seen, min(_time) as first_seen, latest(hostname) as hostname, latest(easm.hostname) as easm_hostname by easm.entity, ip, port, easm.port_scan_type 
+| eval _time = last_seen ``` 
+| rename easm.hostname as easm_hostname 
+| rename easm.* as * 
+| eval ip = mvjoin(ip,",") 
+| convert ctime(*seen) 
+| lookup port_to_service_lookup port
+| table entity, ip, port, service, hostname, easm_hostname, port_scan_type
+| rename hostname as "hostname (from discovery)", easm_hostname as "hostname (queried)", service as "service (likely)"
+| sort -_time</query>
+          <earliest>$timePicker1.earliest$</earliest>
+          <latest>$timePicker1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

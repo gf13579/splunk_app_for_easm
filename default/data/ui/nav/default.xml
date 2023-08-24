@@ -1,0 +1,66 @@
+<nav search_view="search">
+  <view name="overview" default='true' />
+
+
+  <collection label="Recent Results">
+    <view name="recent_subdomains" />
+    <view name="recent_open_ports" />
+    <view name="recent_web_services" />
+    <view name="recent_dns_resolution" />
+    <view name="recent_certificates" />
+    <view name="recent_web_technologies" />
+    <view name="recent_web_vulnerabilities" />
+    <view name="recent_web_spiders" />
+  </collection>
+
+  
+  <collection label="Tracked Items">
+    <view name="all_subdomains" />
+    <view name="all_open_ports" />
+    <view name="all_web_services" />
+  </collection>
+  
+  <collection label="Analysis">
+    <view name="potential_apex_domains" />
+    <view name="site_spider_changes_url_diff" />
+  </collection>
+
+  <collection label="Search">
+    <view name="search_tracked_items" />
+    <view name="search_results" />
+    <view name="search" />
+  </collection>
+  
+  <collection label="Configuration">
+    <collection label="Seed Entities">
+    <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=apex_domains.csv&amp;type=csv" target="_blank">Edit Seed Domains</a>
+    <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=ip_ranges.csv&amp;type=csv" target="_blank">Edit Seed IPs</a>
+    <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=known_subdomains.csv&amp;type=csv" target="_blank">Edit Seed Subdomains</a>
+    </collection>
+    <collection label="Discovered Entities">
+    <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=discovered_subdomains.csv&amp;type=csv" target="_blank">Edit Discovered Subdomains</a>
+    <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=discovered_open_ports.csv&amp;type=csv" target="_blank">Edit Discovered Ports</a>
+    <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=discovered_web_services.csv&amp;type=csv" target="_blank">Edit Discovered Web Services</a>
+    </collection>
+    <collection label="Data Inputs">
+      <a href="/manager/app_for_easm/data/inputs/easminput/" target="_blank">Edit Discovery Jobs</a>
+      <a href="/manager/app_for_easm/data/inputs/easm_vuln_scan_input/" target="_blank">Edit Vuln Scan Jobs</a>
+      <a href="/manager/app_for_easm/data/inputs/easm_active_port_scan_input/" target="_blank">Edit Active Port Scan Jobs</a>
+      <a href="/manager/app_for_easm/data/inputs/easm_web_spider_input/" target="_blank">Edit Web Spider Jobs</a>
+    </collection>
+    <a href="/app/app_for_easm/setup_page_dashboard?action=edit" target="_blank">Setup Ingest Target (HEC)</a>
+    
+  </collection>
+  
+  <collection label="Advanced">
+    <collection label="Splunk Default">
+      <view name="reports" />
+      <view name="alerts" />
+      <view name="dashboards" />
+    </collection>
+    <view name="web_service_scan_result" />
+    <view name="easm_logs"  />
+    <view name="development" />
+    
+  </collection>
+</nav>

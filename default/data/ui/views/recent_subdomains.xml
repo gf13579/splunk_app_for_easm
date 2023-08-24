@@ -1,0 +1,37 @@
+<form version="1.1" theme="dark">
+  <label>Subdomains</label>
+  <description>Recent search results combined with historic data from the discovered_subdomains lookup</description>
+  <fieldset submitButton="false">
+    <input type="time" token="timePicker1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>index="easm" sourcetype="easm:subdomain" 
+| stats max(_time) as last_seen, min(_time) as first_seen, latest(ip) as ip, latest(discovery_source) as discovery_source by easm.entity, hostname 
+| eval _time = last_seen 
+| rename easm.entity as entity 
+| eval ip = mvjoin(ip,",") | convert ctime(*seen) | table entity, hostname, ip, last_seen, first_seen, discovery_source</query>
+          <earliest>$timePicker1.earliest$</earliest>
+          <latest>$timePicker1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

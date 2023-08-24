@@ -1,0 +1,249 @@
+<form version="1.1" theme="dark">
+  <label>Subdomain Detail</label>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="tokSub" searchWhenChanged="true">
+      <label>Subdomain</label>
+      <fieldForLabel>hostname</fieldForLabel>
+      <fieldForValue>hostname</fieldForValue>
+      <search>
+        <query>index="easm" sourcetype="easm:subdomain"
+| fields hostname
+| dedup hostname</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+    </input>
+  </fieldset>
+  <row depends="$nothing$">
+    <panel>
+      <html>
+        <style>
+          #countPanel1{
+            width:10% !important;
+          }
+          #countPanel2{
+            width:10% !important;
+          }
+          #countPanel3{
+            width:10% !important;
+          }
+          #countPanel4{
+            width:10% !important;
+          }
+          #countPanel5{
+            width:10% !important;
+          }
+          #countPanel6{
+            width:10% !important;
+          }
+          #detailPanel1{
+            width:90% !important;
+          }
+          #detailPanel2{
+            width:90% !important;
+          }
+          #detailPanel3{
+            width:90% !important;
+          }
+          #detailPanel4{
+            width:90% !important;
+          }
+          #detailPanel5{
+            width:90% !important;
+          }
+          #detailPanel6{
+            width:90% !important;
+          }
+
+        </style>
+      </html>
+      <table>
+        <title>Ports Base</title>
+        <search id="portBase">
+          <query>
+            index="easm" sourcetype="easm:open_port" easm.hostname=$tokSub|s$
+            | stats count by port hostname ip
+            | fields port hostname ip
+          </query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <done>
+            <condition match="'job.resultCount' &gt; 0">
+              <set token="showPort">true</set>
+              <unset token="msgPort"></unset>
+            </condition>
+            <condition>
+              <set token="msgPort">true</set>
+              <unset token="showPort"></unset>
+            </condition>
+          </done>
+        </search>
+        <option name="count">5</option>
+      </table>
+      <table>
+        <title>Certs base</title>
+        <search id="certBase">
+          <query>index="easm"  easm.target=$tokSub|s$ sourcetype="easm:tls_cert"
+| table issuer_cn ip not_after not_before port subject_cn tls_version sni</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <progress>
+            <condition match="'job.resultCount' &gt; 0">
+              <set token="showCert">true</set>
+            </condition>
+            <condition>
+              <unset token="showCert"></unset>
+            </condition>
+          </progress>
+        </search>
+      </table>
+      <table>
+        <title>Http Services base</title>
+        <search id="httpBase">
+          <query>index="easm" sourcetype="easm:http_service" "easm.target"=$tokSub$
+| table hostname scheme status_code title url webserver
+| dedup url</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <done>
+            <condition match="'job.resultCount' &gt; 0">
+              <set token="showHttp">true</set>
+              <unset token="msgHttp"></unset>
+            </condition>
+            <condition>
+              <set token="msgHttp">true</set>
+              <unset token="showHttp"></unset>
+            </condition>
+          </done>
+        </search>
+        <option name="count">5</option>
+      </table>
+      <table>
+        <title>Web Tech base</title>
+        <search id="techBase">
+          <query>index="easm" sourcetype="easm:web_tech_scan" [| search index="easm" sourcetype="easm:http_service" "easm.target"=$tokSub|s$
+| table url
+| dedup url
+| rename url as easm.target]
+| rename matched-at AS matched_at, info.name AS info_name
+| eval matched_at = case(match(matched_at,"^http"),matched_at,match(matched_at,":443"),"https://".matched_at,match(info_name,"SSL"),"https://".matched_at, 1=1,matched_at) 
+| sort -_time 
+| rename *{} as * 
+| table _time, easm.entity, info.severity, hostname, info_name, matcher-name, extracted-results, matched_at, ip
+| eval finding_detail = coalesce(mvappend('matcher-name','extracted-results'), "N\A")
+| fields - matcher-name, extracted-results, easm.entity
+| stats values(*) as * by info_name finding_detail</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <done>
+            <condition match="'job.resultCount' &gt; 0">
+              <set token="showTech">true</set>
+              <unset token="msgTech"></unset>
+            </condition>
+            <condition>
+              <set token="msgTech">true</set>
+              <unset token="showTech"></unset>
+            </condition>
+          </done>
+        </search>
+      </table>
+    </panel>
+  </row>
+  <row depends="$showHttp$">
+    <panel id="countPanel3">
+      <single>
+        <title>Http Services</title>
+        <search base="httpBase">
+          <query>| stats dc(url) as url</query>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+    <panel id="detailPanel3">
+      <table>
+        <search base="httpBase">
+          <query/>
+        </search>
+        <option name="count">5</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row depends="$showPort$">
+    <panel id="countPanel1">
+      <single>
+        <title>Open Ports</title>
+        <search base="portBase">
+          <query>| stats dc(port) as Ports</query>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+    <panel id="detailPanel1">
+      <table>
+        <search base="portBase">
+          <query/>
+        </search>
+        <option name="count">5</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row depends="$showCert$">
+    <panel id="countPanel2">
+      <single>
+        <title>Certificates</title>
+        <search base="certBase">
+          <query>| stats dc(subject_cn) as Certs</query>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+    <panel id="detailPanel2">
+      <table>
+        <search base="certBase">
+          <query/>
+        </search>
+        <option name="count">5</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+    <row depends="$showTech$">
+    <panel id="countPanel4">
+      <single>
+        <title>Web Technologies</title>
+        <search base="techBase">
+          <query>| stats count</query>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+    <panel id="detailPanel4">
+      <table>
+        <search base="techBase">
+          <query/>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$msgHttp$">
+      <html>
+        <p>No Http Services Found</p>
+      </html>
+    </panel>
+    <panel depends="$msgPort$">
+      <html>
+        <p>No Open Ports Found</p>
+      </html>
+    </panel>
+    <panel depends="$msgTech$">
+      <html>
+        <p>No Web Technologies Found</p>
+      </html>
+    </panel>
+  </row>
+</form>

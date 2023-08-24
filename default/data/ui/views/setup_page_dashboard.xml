@@ -1,0 +1,66 @@
+<!--
+Both of the <dashboard> element's `styles` and `script` attribute search for
+files in `$SPLUNK_HOME/etc/<SPLUNK_APP_NAME>/appserver/static/*`
+
+Documentation link:
+https://docs.splunk.com/Documentation/Splunk/latest/Viz/PanelreferenceforSimplifiedXML#dashboard_or_form
+-->
+<dashboard isDashboard='false'
+           script='javascript/setup_page.js'
+           stylesheet='styles/setup_page.css'
+           hideTitle='true'
+           version='1.1'>
+    <row>
+        <panel>
+            <html>
+                <div id='main_container'>
+                    <h3>EASM Setup Page</h3>
+                    <div>
+                    <table>
+                    <tr>
+                    <td>Base URL of EASM Worker</td><td><input type='text' id='workerurl_input'></input></td>
+                    </tr>
+                    <tr>
+                    <td>API Key</td><td><input type='password' id='apikey_input'></input></td>
+                    </tr>
+                    <tr>
+                    <td>HEC URL</td><td><input type='text' id='hecurl_input'></input></td>
+                    </tr>
+                    <tr>
+                    <td>HEC Token</td><td><input type='password' id='hectoken_input'></input></td>
+                    </tr>
+                    </table>
+                    Note that the EASM Worker base URL must start with https or the modular input will deliberately fail.
+                    <br/>
+
+                        <!-- <div class='text'>
+                            <span>Base URL of EASM Worker</span>
+                            <input type='text' id='workerurl_input'></input>
+                        </div>
+                        <div class='text'>
+                            <span>API Key</span>
+                            <input type='password' id='apikey_input'></input>
+                        </div>
+                        <div class='text'>
+                            <span>HEC URL</span>
+                            <input type='text' id='hecurl_input'></input>
+                        </div>
+                        <div class='text'>
+                            <span>HEC token</span>
+                            <input type='password' id='hectoken_input'></input>
+                        </div>
+                        <div class='text'>
+                            <span>The HEC URL should be complete and point to the <strong>event</strong> endpoint i.e: <pre>https://[host].[domain]:[port]/services/collector/event</pre></span>
+                        </div> -->
+                        <!-- Complete Setup button will call the completeSetup() function
+                             within javascript/setup_page.js -->
+                        <button id='setup_button'>Complete Setup</button>
+                        <div class='success'>Password saved successfully, redirecting to app...</div>
+                        <div class='error'>Issue encountered during setup, details below:</div>
+                        <code id='error_details'></code>
+                    </div>
+                </div>
+            </html>
+        </panel>
+    </row>
+</dashboard>

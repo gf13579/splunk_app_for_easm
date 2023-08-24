@@ -1,0 +1,79 @@
+<form version="1.1" theme="dark">
+  <label>Web Vulnerabilities</label>
+  <fieldset submitButton="false">
+    <input type="time" token="timePicker1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="targetToken">
+      <label>Target</label>
+      <fieldForLabel>easm.target</fieldForLabel>
+      <fieldForValue>easm.target</fieldForValue>
+      <search>
+        <query>`easm_index` sourcetype="easm:web_vuln_scan" | stats count by easm.target</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="multiselect" token="scanIdsToken">
+      <label>Scan Templates Filter</label>
+      <choice value="*">All</choice>
+      <fieldForLabel>name</fieldForLabel>
+      <fieldForValue>name</fieldForValue>
+      <search>
+        <query>`easm_index` sourcetype="easm:web_vuln_scan" | stats count by info.name | table info.name | rename info.name as name</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <valuePrefix>"</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter>,</delimiter>
+      <default>*</default>
+    </input>
+    <input type="multiselect" token="scanIdsToExcludeToken">
+      <label>Scan Templates Exclusions</label>
+      <fieldForLabel>name</fieldForLabel>
+      <fieldForValue>name</fieldForValue>
+      <search>
+        <query>`easm_index` sourcetype="easm:web_vuln_scan" | stats count by info.name | table info.name | rename info.name as name</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <valuePrefix>"</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <delimiter>,</delimiter>
+      <choice value="made_up_value">[None]</choice>
+      <default>TLS Version - Detect</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>`easm_index` sourcetype="easm:web_vuln_scan" info.name IN $scanIdsToken$ NOT info.name IN $scanIdsToExcludeToken$ easm.target = "$targetToken$"
+| sort -_time 
+| rename *{} as * 
+| table _time, easm.entity, info.severity, hostname, info.name, matcher-name, extracted-results, matched-at,ip</query>
+          <earliest>$timePicker1.earliest$</earliest>
+          <latest>$timePicker1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

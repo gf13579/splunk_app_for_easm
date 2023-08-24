@@ -1,0 +1,40 @@
+<form version="1.1" theme="dark">
+  <label>TLS Certificates</label>
+  <fieldset submitButton="false">
+    <input type="time" token="timePicker1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="dnFilterToken">
+      <label>Exclude DNs Matching</label>
+      <initialValue>*Microsoft Corporation*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>`easm_index` sourcetype="easm:tls_cert" NOT subject_dn="$dnFilterToken$"
+| dedup easm.entity, hostname 
+| sort -_time 
+| table _time, easm.entity, hostname, sni, subject*, not*, port*, tls_version, cipher, issue_dn
+| rename easm.entity as entity, *{} as *</query>
+          <earliest>$timePicker1.earliest$</earliest>
+          <latest>$timePicker1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

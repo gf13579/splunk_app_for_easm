@@ -1,0 +1,89 @@
+<form version="1.1" theme="dark">
+  <label>Surface Explorer</label>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="apex" searchWhenChanged="true">
+      <label>Apex Domain</label>
+      <choice value="*">All</choice>
+      <fieldForLabel>input</fieldForLabel>
+      <fieldForValue>input</fieldForValue>
+      <search>
+        <query>index=easm sourcetype="easm:subdomain" 
+| stats count by input</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <viz type="network-diagram-viz.network-diagram-viz">
+        <title>$tokfrom$ $nd_to_node_token$</title>
+        <search>
+          <query>| multisearch 
+    [| search index=easm sourcetype="easm:subdomain" input=$apex$ 
+    | rename input as from hostname as to 
+    | eval type = "globe"
+    | eval value= "Source: ". discovery_source . " IP: ". ip ] 
+    [| search index=easm sourcetype="easm:http_service" 
+        [| search index=easm sourcetype="easm:subdomain" input=$apex$ 
+        | dedup hostname 
+        | rename hostname as input 
+        | table input ] 
+    | rename input as from cname{} as to 
+    | eval type = "server"
+    | eval value = "WebServer: " . coalesce(webserver,"NA")] 
+| stats count by from to type sourcetype value</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="height">809</option>
+        <option name="network-diagram-viz.network-diagram-viz.arrowLocation">none</option>
+        <option name="network-diagram-viz.network-diagram-viz.canZoom">true</option>
+        <option name="network-diagram-viz.network-diagram-viz.clusterBy">none</option>
+        <option name="network-diagram-viz.network-diagram-viz.defaultLinkLength">100</option>
+        <option name="network-diagram-viz.network-diagram-viz.defaultNodeType">info</option>
+        <option name="network-diagram-viz.network-diagram-viz.draggableNodes">true</option>
+        <option name="network-diagram-viz.network-diagram-viz.drilldownClick">singleOrDouble</option>
+        <option name="network-diagram-viz.network-diagram-viz.enablePhysics">true</option>
+        <option name="network-diagram-viz.network-diagram-viz.hierarchy">false</option>
+        <option name="network-diagram-viz.network-diagram-viz.hierarchyDirection">Bottom-Up</option>
+        <option name="network-diagram-viz.network-diagram-viz.hierarchySortMethod">directed</option>
+        <option name="network-diagram-viz.network-diagram-viz.levelSeparation">150</option>
+        <option name="network-diagram-viz.network-diagram-viz.linkTextLocation">horizontal</option>
+        <option name="network-diagram-viz.network-diagram-viz.linkTextSize">medium</option>
+        <option name="network-diagram-viz.network-diagram-viz.missingImageURL">/static/app/network-diagram-viz/customimages/404.gif</option>
+        <option name="network-diagram-viz.network-diagram-viz.nodeSpacing">100</option>
+        <option name="network-diagram-viz.network-diagram-viz.nodeTextSize">small</option>
+        <option name="network-diagram-viz.network-diagram-viz.physicsModel">barnesHut</option>
+        <option name="network-diagram-viz.network-diagram-viz.shakeTowards">roots</option>
+        <option name="network-diagram-viz.network-diagram-viz.smoothEdgeType">dynamic</option>
+        <option name="network-diagram-viz.network-diagram-viz.smoothEdges">true</option>
+        <option name="network-diagram-viz.network-diagram-viz.tokenNode">nd_node_token</option>
+        <option name="network-diagram-viz.network-diagram-viz.tokenToNode">nd_to_node_token</option>
+        <option name="network-diagram-viz.network-diagram-viz.tokenToolTip">nd_tooltip_token</option>
+        <option name="network-diagram-viz.network-diagram-viz.tokenValue">nd_value_token</option>
+        <option name="network-diagram-viz.network-diagram-viz.wrapNodeText">false</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="tokfrom">$row.from$</set>
+        </drilldown>
+      </viz>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <event>
+        <search>
+          <query>index=easm $tokfrom$</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="list.drilldown">none</option>
+      </event>
+    </panel>
+  </row>
+</form>

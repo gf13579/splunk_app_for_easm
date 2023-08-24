@@ -1,0 +1,42 @@
+<form version="1.1" theme="dark">
+  <label>Potential Apex Domains</label>
+  <fieldset submitButton="false">
+    <input type="time" token="timePicker1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>FQDN from TLS Cert Canonical Names and Subject Alternate Names</title>
+      <table>
+        <title>Excludes seed apex domains, seed subdomains and discovered subdomains</title>
+        <search>
+          <query>`easm_index` sourcetype="easm:tls_cert" NOT subject_dn IN ("*microsoft*", "*wpengine.com*") 
+| rename subject_an{} as subject_an 
+| rex mode=sed field=subject_an "s/^\*\.//g" 
+| rex mode=sed field=subject_cn "s/^\*\.//g" 
+| table easm.entity, hostname, subject_an, subject_cn
+| eval subject = mvappend(subject_an, subject_cn) | eval subject = mvdedup(subject) | stats count by subject, easm.entity, hostname
+
+| lookup apex_domains.csv target as subject 
+| where isnull(entity)
+| lookup discovered_subdomains.csv hostname as subject | where isnull(entity) | stats values(hostname) as hostname by easm.entity, subject | eval hostname = mvjoin(hostname,",")</query>
+          <earliest>$timePicker1.earliest$</earliest>
+          <latest>$timePicker1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

@@ -1,0 +1,51 @@
+<form version="1.1" theme="dark">
+  <label>Search Results</label>
+  <fieldset submitButton="false">
+    <input type="time" token="timePicker1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="sourcetypeToken">
+      <label>sourcetype</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <fieldForLabel>sourcetype</fieldForLabel>
+      <fieldForValue>sourcetype</fieldForValue>
+      <search>
+        <query>`easm_index` | stats count by sourcetype | table sourcetype</query>
+        <earliest>-5d@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="text" token="splToken">
+      <label>Search (SPL)</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <event>
+        <search>
+          <query>`easm_index` sourcetype="$sourcetypeToken$" $splToken$</query>
+          <earliest>$timePicker1.earliest$</earliest>
+          <latest>$timePicker1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="list.drilldown">none</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">5</option>
+        <option name="raw.drilldown">full</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">0</option>
+        <option name="table.drilldown">all</option>
+        <option name="table.sortDirection">asc</option>
+        <option name="table.wrap">1</option>
+        <option name="type">list</option>
+      </event>
+    </panel>
+  </row>
+</form>

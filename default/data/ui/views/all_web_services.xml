@@ -1,0 +1,51 @@
+<form version="1.1" theme="dark">
+  <label>Web Services (tracked)</label>
+  <description>Recent search results combined with historic data from the discovered_web_services lookup</description>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="entityToken">
+      <label>Entity</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <fieldForLabel>entity</fieldForLabel>
+      <fieldForValue>entity</fieldForValue>
+      <search>
+        <query>| inputlookup discovered_web_services.csv | stats count by entity</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+    <input type="radio" token="hideIpBasedHostFilterToken">
+      <label></label>
+      <choice value="regex url != &quot;//\d+\.\d+\.\d+\.\d+&quot;">Hide IP-based hosts</choice>
+      <choice value="regex url=&quot;.*&quot;">Show all</choice>
+      <initialValue>regex url != "//\d+\.\d+\.\d+\.\d+"</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>`get_all_discovered_web_services` 
+| search entity="$entityToken$" | $hideIpBasedHostFilterToken$
+| sort - last_seen 
+| convert ctime(*seen) 
+| table entity, url, title, webserver, load_time, status_code, hostname, lines, location, method, port, scheme, words, body_md5, a_records, failed, last_seen, first_seen</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <set token="url">$row.url$</set>
+          <link target="_blank">$url|n$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>
