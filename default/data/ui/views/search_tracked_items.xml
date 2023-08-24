@@ -18,16 +18,16 @@
     <panel>
       <table>
         <search>
-          <query>| inputlookup discovered_subdomains.csv 
-| eval lookup_file="discovered_subdomains" 
-| append 
-    [| inputlookup discovered_open_ports.csv 
-    | eval lookup_file="discovered_open_ports"] 
-| append 
-    [| inputlookup discovered_web_services.csv 
-    | eval lookup_file="discovered_web_services"] 
-| table _time, hostname, first_seen, last_seen, ip, port, lookup_file 
-| convert ctime(*seen) 
+          <query>| inputlookup discovered_subdomains
+| eval lookup_file="discovered_subdomains"
+| append
+    [| inputlookup discovered_open_ports.csv
+    | eval lookup_file="discovered_open_ports"]
+| append
+    [| inputlookup discovered_web_services.csv
+    | eval lookup_file="discovered_web_services"]
+| table _time, hostname, first_seen, last_seen, ip, port, lookup_file
+| convert ctime(*seen)
 | search ip="$ipToken$" hostname="$hostnameToken$" port="$portToken$"</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
