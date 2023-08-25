@@ -9,6 +9,7 @@ name: "Package Splunk App"
 permissions:
   contents: read
   packages: write
+  pull-requests: read
 jobs:
   package:
     runs-on: ubuntu-latest
