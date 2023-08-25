@@ -15,16 +15,16 @@
       <table>
         <title>Excludes seed apex domains, seed subdomains and discovered subdomains</title>
         <search>
-          <query>`easm_index` sourcetype="easm:tls_cert" NOT subject_dn IN ("*microsoft*", "*wpengine.com*") 
-| rename subject_an{} as subject_an 
-| rex mode=sed field=subject_an "s/^\*\.//g" 
-| rex mode=sed field=subject_cn "s/^\*\.//g" 
+          <query>`easm_index` sourcetype="easm:tls_cert" NOT subject_dn IN ("*microsoft*", "*wpengine.com*")
+| rename subject_an{} as subject_an
+| rex mode=sed field=subject_an "s/^\*\.//g"
+| rex mode=sed field=subject_cn "s/^\*\.//g"
 | table easm.entity, hostname, subject_an, subject_cn
 | eval subject = mvappend(subject_an, subject_cn) | eval subject = mvdedup(subject) | stats count by subject, easm.entity, hostname
 
-| lookup apex_domains.csv target as subject 
+| lookup apex_domains.csv target as subject
 | where isnull(entity)
-| lookup discovered_subdomains.csv hostname as subject | where isnull(entity) | stats values(hostname) as hostname by easm.entity, subject | eval hostname = mvjoin(hostname,",")</query>
+| lookup discovered_subdomains hostname as subject | where isnull(entity) | stats values(hostname) as hostname by easm.entity, subject | eval hostname = mvjoin(hostname,",")</query>
           <earliest>$timePicker1.earliest$</earliest>
           <latest>$timePicker1.latest$</latest>
           <sampleRatio>1</sampleRatio>

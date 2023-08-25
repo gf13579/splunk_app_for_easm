@@ -1,0 +1,37 @@
+---
+name: "Package Splunk App"
+
+"on":
+  push:
+    branches:
+      - main  # Set a branch to deploy
+
+permissions:
+  contents: read
+  packages: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Package the app
+        run: |
+          python --version
+          python -m pip install ksconf
+          find . -type f -name '*.conf' -exec ksconf check {} \;
+          ./package.sh
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Latest Build"
+          files: |
+            splunk_app_for_easm.tgz

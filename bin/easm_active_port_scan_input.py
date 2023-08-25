@@ -1,27 +1,27 @@
 import json
 import os
+import re
 import sys
+
 from loguru import logger
 import requests
-# import splunklib.results as results
 from requests.adapters import HTTPAdapter, Retry
 import easm_helper
-import re
 
 # sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lib"))
 
 from splunklib.modularinput import Scheme, Argument, Event, Script
 
 
-sys.path.append(
-    os.path.join(os.environ["SPLUNK_HOME"], "etc", "apps", "SA-VSCode", "bin")
-)
-import splunk_debug as dbg  # noqa: E402 "# type: ignore
-
-dbg.enable_debugging(timeout=10)
-
-dbg.set_breakpoint()
-
+# sys.path.append(
+#     os.path.join(os.environ["SPLUNK_HOME"], "etc", "apps", "SA-VSCode", "bin")
+# )
+# try:
+#     import splunk_debug as dbg  # noqa: E402 "# type: ignore
+#     dbg.enable_debugging(timeout=10)
+#     dbg.set_breakpoint()
+# except ImportError as error:
+#     print("Failed to import splunk_debug", file=sys.stderr)
 
 log_file = os.environ["SPLUNK_HOME"] + "/var/log/splunk/app_for_easm.log"
 logger.remove()
@@ -38,7 +38,8 @@ def flatten_list(list_of_lists):
 
 class MyScript(Script):
     def get_scheme(self):
-        # "EASM Active Port Scan Input" is the name Splunk will display to users for this input.
+        """EASM Active Port Scan Input" is the name Splunk will
+        display to users for this input."""
         scheme = Scheme("EASM Active Port Scan Input")
 
         scheme.description = (
@@ -55,8 +56,10 @@ class MyScript(Script):
         url_argument = Argument("targets")
         url_argument.title = "Targets (Leave blank to scan all discovered targets)"
         url_argument.data_type = Argument.data_type_string
-        url_argument.description = ("Comma-separated list of IPs and hostnames."
-                                    " Leave blank to scan all discovered targets")
+        url_argument.description = (
+            "Comma-separated list of IPs and hostnames."
+            " Leave blank to scan all discovered targets"
+        )
         scheme.add_argument(url_argument)
 
         entity_argument = Argument("entity")
@@ -81,7 +84,8 @@ class MyScript(Script):
         #     raise ValueError("targets must be...")
 
     def stream_events(self, inputs, ew):
-        # there should only be one input as we're setting scheme.use_single_instance = False
+        """there should only be one input as we're setting
+        scheme.use_single_instance = False"""
         stanza = list(inputs.inputs.keys())[0]
         logger.debug(f"stanza name is {stanza}")
 
@@ -111,14 +115,14 @@ class MyScript(Script):
 
         if target_list == ["None"]:
             target_list = (
-                    [target["target"] for target in apex_domains]
-                    + [target["target"] for target in ip_ranges]
-                    + [target["target"] for target in known_subdomains]
-                    + [target["hostname"] for target in discovered_subdomains]
-                    + flatten_list(
-                        [target["ip"].split(",") for target in discovered_subdomains]
-                    )
+                [target["target"] for target in apex_domains]
+                + [target["target"] for target in ip_ranges]
+                + [target["target"] for target in known_subdomains]
+                + [target["hostname"] for target in discovered_subdomains]
+                + flatten_list(
+                    [target["ip"].split(",") for target in discovered_subdomains]
                 )
+            )
 
         settings = easm_helper.get_password(self.service, "app_for_easm_realm")
         if settings is None:
@@ -160,11 +164,18 @@ class MyScript(Script):
 
         if host_filter != "":
             try:
-                target_list = [target for target in target_list if re.match(pattern=host_filter,
-                                                                            string=target)]
+                target_list = [
+                    target
+                    for target in target_list
+                    if re.match(pattern=host_filter, string=target)
+                ]
             except Exception as e:
-                logger.error(("Exception occured attempting to apply host_filter"
-                              f"regex {host_filter} to target_list"))
+                logger.error(
+                    (
+                        "Exception occured attempting to apply host_filter"
+                        f"regex {host_filter} to target_list"
+                    )
+                )
                 logger.error(str(e))
                 return
 
@@ -180,7 +191,9 @@ class MyScript(Script):
         session.mount("http://", HTTPAdapter(max_retries=retries))
 
         try:
-            logger.info("Trying to POST to " + worker_url + "/discovery/open_ports_scan/")
+            logger.info(
+                "Trying to POST to " + worker_url + "/discovery/open_ports_scan/"
+            )
             response = session.post(
                 worker_url + "/discovery/open_ports_scan/",
                 headers=headers,

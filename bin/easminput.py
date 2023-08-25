@@ -16,11 +16,13 @@ from splunklib.modularinput import Scheme, Argument, Event, Script
 # sys.path.append(
 #     os.path.join(os.environ["SPLUNK_HOME"], "etc", "apps", "SA-VSCode", "bin")
 # )
-# import splunk_debug as dbg  # noqa: E402 "# type: ignore
 
-# dbg.enable_debugging(timeout=10)
-
-# dbg.set_breakpoint()
+# try:
+#     import splunk_debug as dbg  # noqa: E402 "# type: ignore
+#     dbg.enable_debugging(timeout=10)
+#     dbg.set_breakpoint()
+# except ImportError as error:
+#     print("Failed to import splunk_debug", file=sys.stderr)
 
 log_file = os.environ["SPLUNK_HOME"] + "/var/log/splunk/app_for_easm.log"
 logger.remove()
@@ -37,7 +39,7 @@ def flatten_list(list_of_lists):
 
 class MyScript(Script):
     def get_scheme(self):
-        # "EASM Input" is the name Splunk will display to users for this input.
+        """ "EASM Input" is the name Splunk will display to users for this input."""
         scheme = Scheme("EASM Input")
 
         scheme.description = (
@@ -71,7 +73,7 @@ class MyScript(Script):
         take_screenshots_argument.title = "Take Screenshots When Scanning Web Services"
         take_screenshots_argument.data_type = Argument.data_type_boolean
         take_screenshots_argument.description = (
-            "Enable screenshots using a headless browser when doing http service discovery."
+            "Enable screenshots using a headless browser when doing http service discovery."  # noqa: E501
             " This increases the time taken for scans and the size of ingested data."
         )
         scheme.add_argument(take_screenshots_argument)
@@ -107,7 +109,8 @@ class MyScript(Script):
         :param ew: an EventWriter object
         """
 
-        # there should only be one input as we're setting scheme.use_single_instance = False
+        # there should only be one input as we're
+        # setting scheme.use_single_instance = False
         stanza = list(inputs.inputs.keys())[0]
         logger.debug(f"stanza name is {stanza}")
 

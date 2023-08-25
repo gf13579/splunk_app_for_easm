@@ -169,3 +169,4 @@ cython_debug/
 #.idea/
 
 *.db
+splunk_app_for_easm.tgz
