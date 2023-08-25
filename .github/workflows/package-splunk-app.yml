@@ -30,5 +30,7 @@ jobs:
           ./package.sh
 
       - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create latest splunk_app_for_easm.tgz --latest --title "Latest Release" --generate-notes
