@@ -29,11 +29,6 @@ jobs:
           find . -type f -name '*.conf' -exec ksconf check {} \;
           ./package.sh
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Latest Build"
-          files: |
-            splunk_app_for_easm.tgz
+      - name: Create the release
+        run: |
+          gh release create latest splunk_app_for_easm.tgz --latest --title "Latest Release" --generate-notes
