@@ -7,10 +7,9 @@ name: "Package Splunk App"
       - main  # Set a branch to deploy
 
 permissions:
-  contents: read
+  contents: write
   packages: write
   pull-requests: read
-
 jobs:
   package:
     runs-on: ubuntu-latest
@@ -29,8 +28,9 @@ jobs:
           find . -type f -name '*.conf' -exec ksconf check {} \;
           ./package.sh
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            splunk_app_for_easm.tgz
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest && true
+          gh release create latest splunk_app_for_easm.tgz --latest --title "Latest Release" --generate-notes
