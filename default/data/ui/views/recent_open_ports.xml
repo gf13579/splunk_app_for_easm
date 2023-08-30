@@ -52,6 +52,7 @@
 | convert ctime(*seen) 
 | lookup port_to_service_lookup port
 | table entity, ip, port, service, hostname, easm_hostname, port_scan_type
+| eval hostname=if(len(hostname)&gt;500,replace(hostname,"^(.{500}).*","\1")."...",hostname) 
 | rename hostname as "hostname (from discovery)", easm_hostname as "hostname (queried)", service as "service (likely)"
 | sort -_time</query>
           <earliest>$timePicker1.earliest$</earliest>

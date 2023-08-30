@@ -19,9 +19,10 @@
         <search>
           <query>`easm_index` sourcetype="easm:tls_cert" NOT subject_dn="$dnFilterToken$"
 | dedup easm.entity, hostname 
+| eval mismatched = if(match(hostname,"\d+\.\d+\.\d+\.\d+"),"",mismatched) 
 | sort -_time 
-| table _time, easm.entity, hostname, sni, subject*, not*, port*, tls_version, cipher, issue_dn
-| rename easm.entity as entity, *{} as *</query>
+| table _time, easm.entity, hostname, sni, subject*, not_after, port*, tls_version, issue_dn, mismatched, expired, revoked, self_signed, revoked 
+| rename easm.entity as entity, *{} as *, hostname as "hostname (queried)"</query>
           <earliest>$timePicker1.earliest$</earliest>
           <latest>$timePicker1.latest$</latest>
           <sampleRatio>1</sampleRatio>

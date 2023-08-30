@@ -1,9 +1,13 @@
 passwords.conf
 local/app.conf
 local/inputs.conf
+local/savedsearches.conf
 
-lookups/*.csv
-lookups/
+lookups/apex_domains.csv
+lookups/discovered*.csv
+lookups/ip_ranges.csv
+lookups/known_subdomains.csv
+lookups/lookup_file_backups
 .vscode/
 local.meta
 discovered*.csv
