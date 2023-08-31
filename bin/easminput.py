@@ -13,9 +13,9 @@ import easm_helper
 
 from splunklib.modularinput import Scheme, Argument, Event, Script
 
-# sys.path.append(
-#     os.path.join(os.environ["SPLUNK_HOME"], "etc", "apps", "SA-VSCode", "bin")
-# )
+sys.path.append(
+    os.path.join(os.environ["SPLUNK_HOME"], "etc", "apps", "SA-VSCode", "bin")
+)
 
 # try:
 #     import splunk_debug as dbg  # noqa: E402 "# type: ignore
@@ -24,13 +24,13 @@ from splunklib.modularinput import Scheme, Argument, Event, Script
 # except ImportError as error:
 #     print("Failed to import splunk_debug", file=sys.stderr)
 
-log_file = os.environ["SPLUNK_HOME"] + "/var/log/splunk/app_for_easm.log"
-logger.remove()
-logger.add(sink=log_file, level="INFO")
-logger.add(sink=sys.stderr, level="ERROR")
+# log_file = os.environ["SPLUNK_HOME"] + "/var/log/splunk/app_for_easm.log"
+# logger.remove()
+# logger.add(sink=log_file, level="INFO")
+# logger.add(sink=sys.stderr, level="ERROR")
 
-# for development
-logger.add(sink=log_file, level="DEBUG")
+# # for development
+# logger.add(sink=log_file, level="DEBUG")
 
 
 def flatten_list(list_of_lists):
@@ -141,32 +141,29 @@ class MyScript(Script):
         apex_domains = [
             item
             for item in easm_helper.read_lookup_file("apex_domains.csv")
-            if item["out_of_scope"] != "true" and item["entity"] in (entity, "*")
-        ]
+            if item["out_of_scope"] != "true" and (item["entity"] == entity or entity == "*")]
         ip_ranges = [
             item
             for item in easm_helper.read_lookup_file("ip_ranges.csv")
-            if item["out_of_scope"] != "true" and item["entity"] in (entity, "*")
-        ]
+            if item["out_of_scope"] != "true" and (item["entity"] == entity or entity == "*")]
         known_subdomains = [
             item
             for item in easm_helper.read_lookup_file("known_subdomains.csv")
-            if item["out_of_scope"] != "true" and item["entity"] in (entity, "*")
-        ]
+            if item["out_of_scope"] != "true" and (item["entity"] == entity or entity == "*")]
         discovered_subdomains = [
             item
             for item in easm_helper.read_lookup_file("discovered_subdomains.csv")
-            if item["entity"] in (entity, "*")
+            if item["entity"] == entity or entity == "*"
         ]
         discovered_open_ports = [
             item
             for item in easm_helper.read_lookup_file("discovered_open_ports.csv")
-            if item["entity"] in (entity, "*")
+            if item["entity"] == entity or entity == "*"
         ]
         discovered_web_services = [
             item
             for item in easm_helper.read_lookup_file("discovered_web_services.csv")
-            if item["entity"] in (entity, "*")
+            if item["entity"] == entity or entity == "*"
         ]
 
         headers = {
@@ -203,6 +200,8 @@ class MyScript(Script):
 
         logger.debug("Starting queries")
 
+        # TO DO - rewrite the following so that target_list ends up a list of entity,target
+        # Then iterate over the distinct list of entities so that we have the right entity when posting to the API
         for dt in discovery_types:
             if dt == "web_tech":
                 target_list = [target["url"] for target in discovered_web_services]
