@@ -8,12 +8,16 @@
         <latest>now</latest>
       </default>
     </input>
+    <input type="text" token="filterToken">
+      <label>Filter</label>
+      <default>*</default>
+    </input>
   </fieldset>
   <row>
     <panel>
       <table>
         <search>
-          <query>`easm_index` sourcetype="easm:dns_records" 
+          <query>`easm_index` sourcetype="easm:dns_records" $filterToken$
 | dedup easm.entity, hostname 
 | sort -_time 
 | table _time, easm.entity, hostname, a{}, cname{}, status_code, ttl 

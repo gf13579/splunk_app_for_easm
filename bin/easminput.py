@@ -13,24 +13,26 @@ import easm_helper
 
 from splunklib.modularinput import Scheme, Argument, Event, Script
 
-sys.path.append(
-    os.path.join(os.environ["SPLUNK_HOME"], "etc", "apps", "SA-VSCode", "bin")
-)
+# sys.path.append(
+#     os.path.join(os.environ["SPLUNK_HOME"], "etc", "apps", "SA-VSCode", "bin")
+# )
 
 # try:
 #     import splunk_debug as dbg  # noqa: E402 "# type: ignore
+
 #     dbg.enable_debugging(timeout=10)
 #     dbg.set_breakpoint()
 # except ImportError as error:
 #     print("Failed to import splunk_debug", file=sys.stderr)
+#     print("Error" + str(error), file=sys.stderr)
 
-# log_file = os.environ["SPLUNK_HOME"] + "/var/log/splunk/app_for_easm.log"
-# logger.remove()
-# logger.add(sink=log_file, level="INFO")
-# logger.add(sink=sys.stderr, level="ERROR")
+log_file = os.environ["SPLUNK_HOME"] + "/var/log/splunk/app_for_easm.log"
+logger.remove()
+logger.add(sink=log_file, level="INFO")
+logger.add(sink=sys.stderr, level="ERROR")
 
-# # for development
-# logger.add(sink=log_file, level="DEBUG")
+# for development
+logger.add(sink=log_file, level="DEBUG")
 
 
 def flatten_list(list_of_lists):
@@ -138,32 +140,50 @@ class MyScript(Script):
             logger.error(message)
             return
 
+        disabled_entities = [
+            item["entity"]
+            for item in easm_helper.read_lookup_file("entities.csv")
+            if item["out_of_scope"] == "true"
+        ]
+
         apex_domains = [
             item
             for item in easm_helper.read_lookup_file("apex_domains.csv")
-            if item["out_of_scope"] != "true" and (item["entity"] == entity or entity == "*")]
+            if item["out_of_scope"] != "true"
+            and (item["entity"] == entity or entity == "*")
+            and item["entity"] not in disabled_entities
+        ]
         ip_ranges = [
             item
             for item in easm_helper.read_lookup_file("ip_ranges.csv")
-            if item["out_of_scope"] != "true" and (item["entity"] == entity or entity == "*")]
+            if item["out_of_scope"] != "true"
+            and (item["entity"] == entity or entity == "*")
+            and item["entity"] not in disabled_entities
+        ]
         known_subdomains = [
             item
             for item in easm_helper.read_lookup_file("known_subdomains.csv")
-            if item["out_of_scope"] != "true" and (item["entity"] == entity or entity == "*")]
+            if item["out_of_scope"] != "true"
+            and (item["entity"] == entity or entity == "*")
+            and item["entity"] not in disabled_entities
+        ]
         discovered_subdomains = [
             item
             for item in easm_helper.read_lookup_file("discovered_subdomains.csv")
-            if item["entity"] == entity or entity == "*"
+            if (item["entity"] == entity or entity == "*")
+            and item["entity"] not in disabled_entities
         ]
         discovered_open_ports = [
             item
             for item in easm_helper.read_lookup_file("discovered_open_ports.csv")
-            if item["entity"] == entity or entity == "*"
+            if (item["entity"] == entity or entity == "*")
+            and item["entity"] not in disabled_entities
         ]
         discovered_web_services = [
             item
             for item in easm_helper.read_lookup_file("discovered_web_services.csv")
-            if item["entity"] == entity or entity == "*"
+            if (item["entity"] == entity or entity == "*")
+            and item["entity"] not in disabled_entities
         ]
 
         headers = {
@@ -200,51 +220,76 @@ class MyScript(Script):
 
         logger.debug("Starting queries")
 
-        # TO DO - rewrite the following so that target_list ends up a list of entity,target
-        # Then iterate over the distinct list of entities so that we have the right entity when posting to the API
         for dt in discovery_types:
             if dt == "web_tech":
-                target_list = [target["url"] for target in discovered_web_services]
+                target_list = [
+                    {"entity": target["entity"], "target": target["url"]}
+                    for target in discovered_web_services
+                ]
             elif dt == "subdomains":
                 # Just apex domains
-                target_list = [target["target"] for target in apex_domains]
+                target_list = [
+                    {"entity": target["entity"], "target": target["target"]}
+                    for target in apex_domains
+                ]
             elif dt in ("dns_records"):
                 # All hostnames
                 target_list = (
-                    [target["target"] for target in apex_domains]
-                    + [target["target"] for target in known_subdomains]
-                    + [target["hostname"] for target in discovered_subdomains]
+                    [
+                        {"entity": target["entity"], "target": target["target"]}
+                        for target in apex_domains
+                    ]
+                    + [
+                        {"entity": target["entity"], "target": target["target"]}
+                        for target in known_subdomains
+                    ]
+                    + [
+                        {"entity": target["entity"], "target": target["target"]}
+                        for target in discovered_subdomains
+                    ]
                 )
             elif dt in ("open_ports", "http_services", "tls_certs"):
                 # All potential hostnames and IPs
                 target_list = (
-                    [target["target"] for target in apex_domains]
-                    + [target["target"] for target in ip_ranges]
-                    + [target["target"] for target in known_subdomains]
+                    [
+                        {"entity": target["entity"], "target": target["target"]}
+                        for target in apex_domains
+                    ]
                     + [
-                        target["hostname"]
+                        {"entity": target["entity"], "target": target["target"]}
+                        for target in ip_ranges
+                    ]
+                    + [
+                        {"entity": target["entity"], "target": target["target"]}
+                        for target in known_subdomains
+                    ]
+                    + [
+                        {"entity": target["entity"], "target": target["hostname"]}
                         for target in discovered_subdomains
                         if target["ip"] != "127.0.0.1"
                     ]
-                    + flatten_list(
-                        [
-                            target["ip"].split(",")
-                            for target in discovered_subdomains
-                            if target["ip"] != "127.0.0.1"
-                        ]
-                    )
+                    # Disabling this due to the noise/dupe of hitting a server by IP as well
+                    # If enabling, it will need to be rewritten
+                    # as target_list is now a list of objects
+                    # + flatten_list(
+                    #     [
+                    #         target["ip"].split(",")
+                    #         for target in discovered_subdomains
+                    #         if target["ip"] != "127.0.0.1"
+                    #     ]
+                    # )
                 )
 
+            # Look for web services on discovered ports beyond 80 and 443:
             if dt == "http_services":
                 target_list += [
-                    str(target["ip"] + ":" + target["port"])
+                    {
+                        "entity": target["entity"],
+                        "target": str(target["ip"] + ":" + target["port"]),
+                    }
                     for target in discovered_open_ports
                     if target["port"] not in easm_consts.COMMON_NON_HTTP_PORTS
                 ]
-
-            json_data["target_list"] = target_list
-            # TESTING
-            # json_data["target_list"] = target_list[:5]
 
             session = requests.Session()
             retries = Retry(
@@ -253,20 +298,49 @@ class MyScript(Script):
             )
             session.mount("http://", HTTPAdapter(max_retries=retries))
 
-            try:
-                logger.info("Trying to POST to " + worker_url + f"/discovery/{dt}/")
-                response = session.post(
-                    worker_url + f"/discovery/{dt}/", headers=headers, json=json_data
+            # Get all entities in scope for the currently running input
+            entity_list = list(
+                set(
+                    [
+                        target["entity"]
+                        for target in target_list
+                        if target["entity"] == entity or entity == "*"
+                    ]
                 )
-            except Exception as e:
-                logger.error(
-                    "Exception occured calling "
-                    + worker_url
-                    + f"/discovery/{dt}/"
-                    + " - "
-                    + str(e)
+            )
+
+            # Iterate over all in-scope entities
+            for ent in entity_list:
+                # Get the list of all relevant targets for this entity
+                targets = list(
+                    set(
+                        [
+                            target["target"]
+                            for target in target_list
+                            if target["entity"] == ent
+                        ]
+                    )
                 )
-                return
+                # Update the body of our request template
+                json_data["entity"] = ent
+                json_data["target_list"] = targets
+
+                try:
+                    logger.info("Trying to POST to " + worker_url + f"/discovery/{dt}/")
+                    response = session.post(
+                        worker_url + f"/discovery/{dt}/",
+                        headers=headers,
+                        json=json_data,
+                    )
+                except Exception as e:
+                    logger.error(
+                        "Exception occured calling "
+                        + worker_url
+                        + f"/discovery/{dt}/"
+                        + " - "
+                        + str(e)
+                    )
+                    return
 
             event = Event()
             event.stanza = stanza

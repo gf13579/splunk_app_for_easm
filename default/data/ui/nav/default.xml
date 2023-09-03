@@ -32,12 +32,13 @@
   </collection>
   
   <collection label="Configuration">
-    <collection label="Seed Entities">
+    <collection label="Seed Items">
+    <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=entities.csv&amp;type=csv" target="_blank">Edit Entities</a>
     <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=apex_domains.csv&amp;type=csv" target="_blank">Edit Seed Domains</a>
     <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=ip_ranges.csv&amp;type=csv" target="_blank">Edit Seed IPs</a>
     <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=known_subdomains.csv&amp;type=csv" target="_blank">Edit Seed Subdomains</a>
     </collection>
-    <collection label="Discovered Entities">
+    <collection label="Discovered Items">
     <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=discovered_subdomains.csv&amp;type=csv" target="_blank">Edit Discovered Subdomains</a>
     <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=discovered_open_ports.csv&amp;type=csv" target="_blank">Edit Discovered Ports</a>
     <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=discovered_web_services.csv&amp;type=csv" target="_blank">Edit Discovered Web Services</a>
