@@ -3,9 +3,9 @@ local/app.conf
 local/inputs.conf
 local/savedsearches.conf
 
-# lookups/apex_domains.csv
-# lookups/ip_ranges.csv
-# lookups/known_subdomains.csv
+lookups/apex_domains.csv
+lookups/ip_ranges.csv
+lookups/known_subdomains.csv
 lookups/discovered*.csv
 lookups/lookup_file_backups
 .vscode/

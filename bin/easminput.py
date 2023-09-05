@@ -268,7 +268,8 @@ class MyScript(Script):
                         for target in discovered_subdomains
                         if target["ip"] != "127.0.0.1"
                     ]
-                    # Disabling this due to the noise/dupe of hitting a server by IP as well
+                    # Disabling this due to the noise/dupe of hitting
+                    # a server by IP as well
                     # If enabling, it will need to be rewritten
                     # as target_list is now a list of objects
                     # + flatten_list(
