@@ -44,12 +44,12 @@
     <a href="/app/lookup_editor/lookup_edit?owner=nobody&amp;namespace=app_for_easm&amp;lookup=discovered_web_services.csv&amp;type=csv" target="_blank">Edit Discovered Web Services</a>
     </collection>
     <collection label="Data Inputs">
-      <a href="/manager/app_for_easm/data/inputs/easminput/" target="_blank">Edit Discovery Jobs</a>
-      <a href="/manager/app_for_easm/data/inputs/easm_vuln_scan_input/" target="_blank">Edit Vuln Scan Jobs</a>
-      <a href="/manager/app_for_easm/data/inputs/easm_active_port_scan_input/" target="_blank">Edit Active Port Scan Jobs</a>
-      <a href="/manager/app_for_easm/data/inputs/easm_web_spider_input/" target="_blank">Edit Web Spider Jobs</a>
+      <a href="/manager/splunk_app_for_easm/data/inputs/easminput/" target="_blank">Edit Discovery Jobs</a>
+      <a href="/manager/splunk_app_for_easm/data/inputs/easm_vuln_scan_input/" target="_blank">Edit Vuln Scan Jobs</a>
+      <a href="/manager/splunk_app_for_easm/data/inputs/easm_active_port_scan_input/" target="_blank">Edit Active Port Scan Jobs</a>
+      <a href="/manager/splunk_app_for_easm/data/inputs/easm_web_spider_input/" target="_blank">Edit Web Spider Jobs</a>
     </collection>
-    <a href="/app/app_for_easm/setup_page_dashboard?action=edit" target="_blank">Setup Ingest Target (HEC)</a>
+    <a href="/app/splunk_app_for_easm/setup_page_dashboard?action=edit" target="_blank">Setup Ingest Target (HEC)</a>
     
   </collection>
   
