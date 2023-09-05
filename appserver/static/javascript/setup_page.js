@@ -1,6 +1,6 @@
 "use strict";
 
-const appName = "app_for_easm";
+const appName = "splunk_app_for_easm";
 const appNamespace = {
     owner: "nobody",
     app: appName,
