@@ -23,7 +23,7 @@ from splunklib.modularinput import Scheme, Argument, Event, Script
 # except ImportError as error:
 #     print("Failed to import splunk_debug", file=sys.stderr)
 
-log_file = os.environ["SPLUNK_HOME"] + "/var/log/splunk/app_for_easm.log"
+log_file = os.environ["SPLUNK_HOME"] + "/var/log/splunk/splunk_app_for_easm.log"
 logger.remove()
 logger.add(sink=log_file, level="INFO")
 logger.add(sink=sys.stderr, level="ERROR")

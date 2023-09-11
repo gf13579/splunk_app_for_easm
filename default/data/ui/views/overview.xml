@@ -224,7 +224,7 @@
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>
         <drilldown>
-          <link target="_blank">/app/app_for_easm/subdomain_detail?form.tokSub=$row.hostname$</link>
+          <link target="_blank">/app/splunk_app_for_easm/subdomain_detail?form.tokSub=$row.hostname$</link>
         </drilldown>
       </table>
     </panel>

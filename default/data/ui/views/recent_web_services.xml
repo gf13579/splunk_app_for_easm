@@ -49,7 +49,7 @@
         <option name="wrap">true</option>
         <drilldown>
           <!--<condition field="url">-->
-          <link target="_blank">/app/app_for_easm/web_service_scan_result?form.urlToken=$row.url$</link>
+          <link target="_blank">/app/splunk_app_for_easm/web_service_scan_result?form.urlToken=$row.url$</link>
           <!--</condition>-->
         </drilldown>
       </table>
