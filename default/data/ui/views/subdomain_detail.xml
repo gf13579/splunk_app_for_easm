@@ -6,7 +6,7 @@
       <fieldForLabel>hostname</fieldForLabel>
       <fieldForValue>hostname</fieldForValue>
       <search>
-        <query>index="easm" sourcetype="easm:subdomain"
+        <query>`easm_index` sourcetype="easm:subdomain"
 | fields hostname
 | dedup hostname</query>
         <earliest>0</earliest>
@@ -61,7 +61,7 @@
         <title>Ports Base</title>
         <search id="portBase">
           <query>
-            index="easm" sourcetype="easm:open_port" easm.hostname=$tokSub|s$
+            `easm_index` sourcetype="easm:open_port" easm.hostname=$tokSub|s$
             | stats count by port hostname ip
             | fields port hostname ip
           </query>
@@ -83,7 +83,7 @@
       <table>
         <title>Certs base</title>
         <search id="certBase">
-          <query>index="easm"  easm.target=$tokSub|s$ sourcetype="easm:tls_cert"
+          <query>`easm_index`  easm.target=$tokSub|s$ sourcetype="easm:tls_cert"
 | table issuer_cn ip not_after not_before port subject_cn tls_version sni</query>
           <earliest>0</earliest>
           <latest></latest>
@@ -100,7 +100,7 @@
       <table>
         <title>Http Services base</title>
         <search id="httpBase">
-          <query>index="easm" sourcetype="easm:http_service" "easm.target"=$tokSub$
+          <query>`easm_index` sourcetype="easm:http_service" "easm.target"=$tokSub$
 | table hostname scheme status_code title url webserver
 | dedup url</query>
           <earliest>0</earliest>
@@ -121,7 +121,7 @@
       <table>
         <title>Web Tech base</title>
         <search id="techBase">
-          <query>index="easm" sourcetype="easm:web_tech_scan" [| search index="easm" sourcetype="easm:http_service" "easm.target"=$tokSub|s$
+          <query>`easm_index` sourcetype="easm:web_tech_scan" [| search `easm_index` sourcetype="easm:http_service" "easm.target"=$tokSub|s$
 | table url
 | dedup url
 | rename url as easm.target]

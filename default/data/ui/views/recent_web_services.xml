@@ -24,7 +24,7 @@
       <table>
         <title>Click to drilldown for more detailed results</title>
         <search>
-          <query>index="easm" sourcetype="easm:http_service" url = "$urlFilter$" NOT url = "$excludeUrlFilter$" 
+          <query>`easm_index` sourcetype="easm:http_service" url = "$urlFilter$" NOT url = "$excludeUrlFilter$" 
 ```| rex field=url mode=sed "s/:(443|80)//g" ```
 | dedup easm.entity, url 
 | rename easm.entity as entity, a{} as a_records, time as load_time_ms, location as redirect_location 
