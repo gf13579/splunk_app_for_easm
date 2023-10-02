@@ -70,7 +70,7 @@
       <table>
         <search>
           <query>`easm_index` sourcetype="easm:web_tech_scan" 
-    [ search index="easm" url="$urlToken$" sourcetype="easm:http_service" 
+    [ search `easm_index` url="$urlToken$" sourcetype="easm:http_service" 
     | eval url = url."*" 
     | rename url as matched-at 
     | fields matched-at] 

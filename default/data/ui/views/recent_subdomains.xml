@@ -16,7 +16,7 @@
       <fieldForLabel>target</fieldForLabel>
       <fieldForValue>target</fieldForValue>
       <search>
-        <query>index="easm" sourcetype="easm:subdomain" | stats count by easm.target | rename easm.target AS target | table target</query>
+        <query>`easm_index` sourcetype="easm:subdomain" | stats count by easm.target | rename easm.target AS target | table target</query>
         <earliest>-24h@h</earliest>
         <latest>now</latest>
       </search>
@@ -26,7 +26,7 @@
     <panel>
       <table>
         <search>
-          <query>index="easm" sourcetype="easm:subdomain" easm.target="$targetToken$"
+          <query>`easm_index` sourcetype="easm:subdomain" easm.target="$targetToken$"
 | stats max(_time) as last_seen, min(_time) as first_seen, latest(ip) as ip, latest(discovery_source) as discovery_source by easm.entity, hostname 
 | eval _time = last_seen 
 | rename easm.entity as entity 

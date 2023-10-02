@@ -27,7 +27,7 @@
       <fieldForLabel>label</fieldForLabel>
       <fieldForValue>port</fieldForValue>
       <search>
-        <query>index="easm" sourcetype="easm:open_port" 
+        <query>`easm_index` sourcetype="easm:open_port" 
 | stats count by port 
 | sort - count 
 | lookup port_to_service_lookup port 
@@ -41,7 +41,7 @@
     <panel>
       <table>
         <search>
-          <query>index="easm" sourcetype="easm:open_port" port IN $portToken$ easm.hostname="$hostnameToken$"
+          <query>`easm_index` sourcetype="easm:open_port" port IN $portToken$ easm.hostname="$hostnameToken$"
 | dedup easm.entity, ip, port, easm.port_scan_type
     ``` 
 | stats max(_time) as last_seen, min(_time) as first_seen, latest(hostname) as hostname, latest(easm.hostname) as easm_hostname by easm.entity, ip, port, easm.port_scan_type 
