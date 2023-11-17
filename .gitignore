@@ -12,6 +12,7 @@ lookups/lookup_file_backups
 .vscode/
 local.meta
 discovered*.csv
+apex_domains.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -175,3 +176,4 @@ cython_debug/
 
 *.db
 splunk_app_for_easm.tgz
+lookups/apex_domains.csv
