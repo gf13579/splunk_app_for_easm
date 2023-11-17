@@ -7,7 +7,7 @@
       <fieldForLabel>input</fieldForLabel>
       <fieldForValue>input</fieldForValue>
       <search>
-        <query>index=easm sourcetype="easm:subdomain" 
+        <query>`easm_index` sourcetype="easm:subdomain" 
 | stats count by input</query>
         <earliest>0</earliest>
         <latest></latest>
@@ -22,12 +22,12 @@
         <title>$tokfrom$ $nd_to_node_token$</title>
         <search>
           <query>| multisearch 
-    [| search index=easm sourcetype="easm:subdomain" input=$apex$ 
+    [| search `easm_index` sourcetype="easm:subdomain" input=$apex$ 
     | rename input as from hostname as to 
     | eval type = "globe"
     | eval value= "Source: ". discovery_source . " IP: ". ip ] 
-    [| search index=easm sourcetype="easm:http_service" 
-        [| search index=easm sourcetype="easm:subdomain" input=$apex$ 
+    [| search `easm_index` sourcetype="easm:http_service" 
+        [| search `easm_index` sourcetype="easm:subdomain" input=$apex$ 
         | dedup hostname 
         | rename hostname as input 
         | table input ] 
@@ -78,7 +78,7 @@
     <panel>
       <event>
         <search>
-          <query>index=easm $tokfrom$</query>
+          <query>`easm_index` $tokfrom$</query>
           <earliest>0</earliest>
           <latest></latest>
         </search>
