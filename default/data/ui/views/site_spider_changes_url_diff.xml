@@ -27,7 +27,7 @@
     </input>
     <input type="text" token="headToken">
       <label>Second Scan Mod (for demos)</label>
-      <initialValue>| eval body_md5=if(random()%3=0,"qwerty",body_md5) | head 20</initialValue>
+      <initialValue>| eval body_md5=if(random()%5=0,"qwerty",body_md5) | head 50</initialValue>
     </input>
     <input type="radio" token="changedFilter">
       <label>View</label>
@@ -41,25 +41,27 @@
       <table>
         <search>
           <query>`easm_index` sourcetype=easm:web_spider easm.target="$targetToken$" earliest=$form.timePicker1.earliest$ latest=$form.timePicker1.latest$ 
-| fillnull response.body_md5
+| fillnull response.body_md5 
 | rename response.body_md5 as body_md5 
 | eval source="list_1" 
 | append 
     [ search `easm_index` sourcetype=easm:web_spider easm.target="$targetToken$" earliest=$form.timePicker2.earliest$ latest=$form.timePicker2.latest$ 
-    | fillnull response.body_md5  
+    | fillnull response.body_md5 
     | rename response.body_md5 as body_md5 
-    $headToken$
+        $headToken$ 
     | eval source="list_2"] 
 | stats dc(source) as dc_source, dc(body_md5) as dc_body_md5, values(source) as source by url 
 | eval source=mvjoin(source,",") 
 | eval list_2_urls = url 
 | rename url as list_1_urls 
-| search dc_source="$changedFilter$" 
-```Append two spaces if the hash is different, one space if the file exists in one list only, or no spaces if they're the same```
+    ```Append two spaces if the hash is different, one space if the file exists in one list only, or no spaces if they're the same```
 | eval list_1_urls = case(dc_body_md5 = 2, list_1_urls."  ", dc_source = 1 AND source = "list_2"," ",dc_source = 1 AND source = "list_1",list_1_urls." ",1=1,list_1_urls) 
-| eval list_2_urls = case(dc_body_md5 = 2, list_2_urls."  ", dc_source = 1 AND source = "list_1"," ",dc_source = 1 AND source = "list_2",list_2_urls."  ",1=1,list_2_urls) | eval hash=if(dc_body_md5=2,"changed","")
-| table hash, list_1_urls, list_2_urls
-| rename list* as scan*</query>
+| eval list_2_urls = case(dc_body_md5 = 2, list_2_urls."  ", dc_source = 1 AND source = "list_1"," ",dc_source = 1 AND source = "list_2",list_2_urls."  ",1=1,list_2_urls) 
+| eval hash=if(dc_body_md5=2,"changed","") 
+| search dc_source="$changedFilter$" OR hash="changed" 
+| table hash, list_1_urls, list_2_urls 
+| rename list* as scan*
+| sort hash</query>
           <earliest>$timePicker1.earliest$</earliest>
           <latest>$timePicker1.latest$</latest>
           <sampleRatio>1</sampleRatio>

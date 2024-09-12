@@ -229,13 +229,14 @@
       </table>
     </panel>
     <panel>
-      <title>Newly Discovered Open Ports (exc. autodiscover.*)</title>
+      <title>Newly Discovered Open Ports (exc. autodiscover.*, msoid.*)</title>
       <table>
         <search>
           <query>`get_all_discovered_open_ports` 
-| where first_seen=last_seen | search NOT easm_hostname = "autodiscover.*"
-| sort - last_seen
-| table entity, ip, port, hostname, easm_hostname
+| where first_seen=last_seen 
+| search NOT easm_hostname IN ("autodiscover.*","msoid.*") 
+| sort - last_seen 
+| table entity, ip, port, hostname, easm_hostname 
 | rename hostname as "hostname (from discovery)", easm_hostname as "hostname (queried)"</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
@@ -245,6 +246,7 @@
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">cell</option>
         <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
         <option name="rowNumbers">false</option>
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>
